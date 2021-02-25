@@ -28,6 +28,30 @@ app.get("/api/notes", (req, res, next) => {
     .catch(next);
 });
 
+app.post("/api/notes", (req, res, next) => {
+  Note.creare(req.body)
+    .then(note => res.status(201).send(note))
+    .catch(next);
+});
+
+app.put("/api/notes/:id", async (req, res, next) => {
+  try {
+    const instance = await Note.findByPk(req.params.id);
+    Object.assign(instance, req.body);
+    await instance.save();
+    res.send(instance);
+  } catch (ex) {
+    next(ex);
+  }
+});
+
+app.delete("/api/notes/:id", (req, res, next) => {
+  Note.findByPk(req.params.id)
+    .then(note => note.destroy())
+    .then(() => res.sendStatus(204))
+    .catch(next);
+});
+
 db.syncAndSeed()
   .then(() => app.listen(port, () => console.log(`listen on port ${port}`)))
   .catch(ex => console.log(ex));
